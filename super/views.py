@@ -1,11 +1,20 @@
-from unittest import TextTestRunner
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializer import SuperSerializer
 from .models import Supers
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def super_list(request):
-    super = Supers.objects.all()
-    serializer = SuperSerializer(super, many=True)
-    return Response(serializer.data)
+    
+    if request.method == 'GET':    
+        super = Supers.objects.all()
+        serializer = SuperSerializer(super, many=True)
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
+    elif request.method == 'POST':
+        serializer = SuperSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
